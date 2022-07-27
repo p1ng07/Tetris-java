@@ -59,10 +59,6 @@ public class MyTetrisGame extends ApplicationAdapter {
 			for (int j = 0; j < rows; j++)
 				this.board[i][j] = false;
 
-		// Set the first tetromino bounds on the board
-		for (Square square : this.currentTetromino.blocks)
-			this.board[square.col][square.row] = true;
-
 	}
 
 	// TODO: Add rotations and moving left and right
@@ -70,7 +66,6 @@ public class MyTetrisGame extends ApplicationAdapter {
 	public void render() {
 		ScreenUtils.clear(Color.LIGHT_GRAY);
 
-		// Draw main board
 		drawMainBoard();
 		drawBoardTetrominos();
 		drawCurrentTetromino();
@@ -86,7 +81,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 				this.boardTetrominos.add(currentTetromino);
 
 				Tetromino newTetromino = new Tetromino(cols / 2, rows - 1);
-				if (isColliding(newTetromino)) {
+				if (isTetrominoColliding(newTetromino)) {
 					isGameOver = true;
 				} else {
 					this.currentTetromino = newTetromino;
@@ -128,7 +123,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 				SQUARE_SIZE);
 	}
 
-	private boolean isColliding(Tetromino tetromino) {
+	private boolean isTetrominoColliding(Tetromino tetromino) {
 		for (Square square : tetromino.blocks) {
 			if (this.board[square.col][square.row]) {
 				return true;
