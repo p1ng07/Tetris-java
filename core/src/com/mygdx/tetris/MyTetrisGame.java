@@ -1,12 +1,17 @@
 package com.mygdx.tetris;
 
 import java.util.Vector;
-import java.util.concurrent.TimeUnit;
 
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.mygdx.tetris.Tetromino.Square;
 
@@ -19,6 +24,8 @@ public class MyTetrisGame extends ApplicationAdapter {
 
 	private boolean isGameOver = false;
 
+	private Stage stage;
+
 	// New tetromino in the top left corner
 	Tetromino currentTetromino = new Tetromino(cols / 2, rows - 1);
 
@@ -28,11 +35,24 @@ public class MyTetrisGame extends ApplicationAdapter {
 	boolean board[][] = new boolean[cols][rows];
 
 	ShapeRenderer shapeRenderer;
-	private long milisecondsToWaitForDrop = 100;
+	private long milisecondsToWaitForDrop = 1000;
+	private float timeElapsed;
+	private float timeToGoDown = 1.0f;
 
 	@Override
 	public void create() {
 		this.shapeRenderer = new ShapeRenderer();
+		this.stage = new Stage();
+
+		this.stage.addListener(new InputListener() {
+			public boolean keyDown(InputEvent event, int keycode) {
+				if (keycode == Input.Keys.DOWN) {
+					currentTetromino.moveDown(board);
+					return true;
+				}
+				return false;
+			}
+		});
 
 		// Reset the game board
 		for (int i = 0; i < cols; i++)
@@ -45,6 +65,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 
 	}
 
+	// TODO: Add rotations and moving left and right
 	@Override
 	public void render() {
 		ScreenUtils.clear(Color.LIGHT_GRAY);
@@ -54,15 +75,23 @@ public class MyTetrisGame extends ApplicationAdapter {
 		drawBoardTetrominos();
 		drawCurrentTetromino();
 
-		try {
-			Thread.sleep(milisecondsToWaitForDrop);
-		} catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
-		}
-		if (!this.currentTetromino.moveDown(this.board)) {
-			this.boardTetrominos.add(currentTetromino);
+		timeElapsed += Gdx.graphics.getDeltaTime();
 
-			this.currentTetromino = new Tetromino(cols / 2, rows - 1);
+		if (Gdx.input.isKeyPressed(Keys.DOWN)) {
+			currentTetromino.moveDown(board);
+		}
+		if (!isGameOver && timeElapsed >= timeToGoDown) {
+			timeElapsed = 0f;
+			if (!this.currentTetromino.moveDown(this.board)) {
+				this.boardTetrominos.add(currentTetromino);
+
+				Tetromino newTetromino = new Tetromino(cols / 2, rows - 1);
+				if (isColliding(newTetromino)) {
+					isGameOver = true;
+				} else {
+					this.currentTetromino = newTetromino;
+				}
+			}
 		}
 	}
 
@@ -97,6 +126,16 @@ public class MyTetrisGame extends ApplicationAdapter {
 	private void drawSquareOnMainBoard(Square position) {
 		shapeRenderer.rect(position.col * SQUARE_SIZE, BOARD_HEIGHT - (rows - position.row) * SQUARE_SIZE, SQUARE_SIZE,
 				SQUARE_SIZE);
+	}
+
+	private boolean isColliding(Tetromino tetromino) {
+		for (Square square : tetromino.blocks) {
+			if (this.board[square.col][square.row]) {
+				return true;
+			}
+		}
+		return false;
+
 	}
 
 	private void drawMainBoard() {
