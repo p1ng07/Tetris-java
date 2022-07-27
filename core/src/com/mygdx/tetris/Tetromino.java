@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.Color;
 /**
  * Rep
  */
-public class Tetromino {
+public class Tetromino extends Object {
     private Color color = Color.ORANGE;
     Square blocks[] = new Square[4];
 
@@ -16,7 +16,6 @@ public class Tetromino {
     public Tetromino(int col, int line) {
         // In order: L, J, I, O, S, T, Z
         int randomNum = ThreadLocalRandom.current().nextInt(1, 7 + 1);
-        randomNum = 7;
         switch (randomNum) {
         // Draw a L shape
         case 1:
@@ -32,7 +31,7 @@ public class Tetromino {
             blocks[1] = new Square(0, -1);
             blocks[2] = new Square(-1, -1);
             blocks[3] = new Square(-2, -1);
-            this.color = Color.BLUE;
+            this.color = Color.PINK;
             break;
         // Draw a I shape
         case 3:
@@ -101,20 +100,35 @@ public class Tetromino {
         }
     }
 
-    public void moveDown(boolean[][] board) {
+    public boolean moveDown(boolean[][] board) {
         boolean canMoveDown = true;
+        // Check if we are at the bottom of the board
         for (Square square : this.blocks) {
             if (square.row - 1 < 0)
-                return;
-            if (board[square.col][square.row - 1] == true) {
+                return false;
+        }
+
+        // Set all of the current tetromino squares to false
+        for (Square square : this.blocks)
+            board[square.col][square.row] = false;
+        // Check if the squares bellow the current tetromino are occupied
+        // If they are filled, then we cant move down
+        for (Square square : this.blocks) {
+            if (board[square.col][square.row - 1]) {
                 canMoveDown = false;
             }
         }
-        if (canMoveDown) {
-            for (Square square : this.blocks) {
-                square.row--;
-            }
+
+        if (!canMoveDown) {
+            for (Square square : this.blocks)
+                board[square.col][square.row] = true;
+            return false;
         }
+        for (Square square : this.blocks) {
+            square.row--;
+            board[square.col][square.row] = true;
+        }
+        return true;
 
     }
 }

@@ -1,15 +1,14 @@
 package com.mygdx.tetris;
 
+import java.util.Vector;
+import java.util.concurrent.TimeUnit;
+
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.mygdx.tetris.Tetromino.Square;
-
-import java.util.concurrent.ThreadLocalRandom;
 
 public class MyTetrisGame extends ApplicationAdapter {
 	static int BOARD_HEIGHT = 800;
@@ -18,15 +17,32 @@ public class MyTetrisGame extends ApplicationAdapter {
 	static int rows = 20;
 	static int SQUARE_SIZE = BOARD_WIDTH / cols;
 
+	private boolean isGameOver = false;
+
 	// New tetromino in the top left corner
 	Tetromino currentTetromino = new Tetromino(cols / 2, rows - 1);
+
+	Vector<Tetromino> boardTetrominos = new Vector<Tetromino>();
+
+	// If board[col][row] is set to true, then a piece is there
 	boolean board[][] = new boolean[cols][rows];
 
 	ShapeRenderer shapeRenderer;
+	private long milisecondsToWaitForDrop = 100;
 
 	@Override
 	public void create() {
 		this.shapeRenderer = new ShapeRenderer();
+
+		// Reset the game board
+		for (int i = 0; i < cols; i++)
+			for (int j = 0; j < rows; j++)
+				this.board[i][j] = false;
+
+		// Set the first tetromino bounds on the board
+		for (Square square : this.currentTetromino.blocks)
+			this.board[square.col][square.row] = true;
+
 	}
 
 	@Override
@@ -35,20 +51,33 @@ public class MyTetrisGame extends ApplicationAdapter {
 
 		// Draw main board
 		drawMainBoard();
+		drawBoardTetrominos();
 		drawCurrentTetromino();
 
 		try {
-
-			Thread.sleep(500);
-		} catch (Throwable e) {
-			System.out.println("Error " + e.getMessage());
-			e.printStackTrace();
+			Thread.sleep(milisecondsToWaitForDrop);
+		} catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
 		}
-		this.currentTetromino.moveDown(this.board);
+		if (!this.currentTetromino.moveDown(this.board)) {
+			this.boardTetrominos.add(currentTetromino);
+
+			this.currentTetromino = new Tetromino(cols / 2, rows - 1);
+		}
 	}
 
-	@Override
-	public void dispose() {
+	private void drawBoardTetrominos() {
+
+		shapeRenderer.begin(ShapeType.Filled);
+		shapeRenderer.set(ShapeType.Filled);
+
+		// Draw every Tetromino block individually
+		for (Tetromino tetromino : this.boardTetrominos) {
+			shapeRenderer.setColor(tetromino.getColor());
+			for (Square position : tetromino.blocks)
+				drawSquareOnMainBoard(position);
+		}
+		shapeRenderer.end();
 	}
 
 	private void drawCurrentTetromino() {
@@ -81,5 +110,4 @@ public class MyTetrisGame extends ApplicationAdapter {
 		}
 		shapeRenderer.end();
 	}
-
 }
