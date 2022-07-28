@@ -4,17 +4,13 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import com.badlogic.gdx.graphics.Color;
 
-/**
- * Rep
- */
-public class Tetromino extends Object {
+public class Tetromino {
     private Color color = Color.ORANGE;
     Square blocks[] = new Square[4];
 
     // Generates a random Tetris Piece
-    // The col and line given are the top left most corner of the piece
+    // The col and line given are the reference square for the piece
     public Tetromino(int col, int line) {
-        // In order: L, J, I, O, S, T, Z
         int randomNum = ThreadLocalRandom.current().nextInt(1, 7 + 1);
         switch (randomNum) {
         // Draw a L shape
@@ -88,15 +84,6 @@ public class Tetromino extends Object {
         return this.color;
     }
 
-    public class Square {
-        int col, row = 0;
-
-        public Square(int col, int row) {
-            this.col = col;
-            this.row = row;
-        }
-    }
-
     // Returns false if tetromino cant move down
     public boolean moveDown(boolean[][] board) {
         boolean canMoveDown = true;
@@ -158,18 +145,25 @@ public class Tetromino extends Object {
 
         // Check if we are at the left most square of the board or if the left square of
         // the board is filled
-        for (Square square : this.blocks) {
-            if (square.col - 1 < 0 || board[square.col - 1][square.row]) {
-
-                for (Square square2 : this.blocks)
+        for (Square square : this.blocks)
+            if (square.col - 1 < 0 || board[square.col - 1][square.row])
+                for (Square square2 : this.blocks) {
                     board[square2.col][square2.row] = true;
-                return;
-            }
-        }
+                    return;
+                }
 
         for (Square square : this.blocks) {
             square.col--;
             board[square.col][square.row] = true;
+        }
+    }
+
+    public class Square {
+        int col, row = 0;
+
+        public Square(int col, int row) {
+            this.col = col;
+            this.row = row;
         }
     }
 }

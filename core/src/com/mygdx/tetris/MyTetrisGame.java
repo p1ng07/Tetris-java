@@ -37,9 +37,11 @@ public class MyTetrisGame extends ApplicationAdapter {
 	ShapeRenderer shapeRenderer;
 
 	private float timeElapsedSinceTouchingGround;
-	private float maximumTimeToSetAPieceAfterTouching = 1.0f;
+	private float timeToSetAPieceAfterTouching = 0.5f;
 
-	private float timeElapsedSinceRight = 0.0f;
+	private float timerLeft;
+	private float timerRight;
+	private float moveTimerThreshold = 0.3f;
 
 	@Override
 	public void create() {
@@ -60,10 +62,9 @@ public class MyTetrisGame extends ApplicationAdapter {
 		for (int i = 0; i < cols; i++)
 			for (int j = 0; j < rows; j++)
 				this.board[i][j] = false;
-
 	}
 
-	// TODO: Add rotations, and timings for move right and left
+	// TODO: Add rotations, ghost piece and hard drop
 	@Override
 	public void render() {
 		ScreenUtils.clear(Color.LIGHT_GRAY);
@@ -77,13 +78,29 @@ public class MyTetrisGame extends ApplicationAdapter {
 
 		if (Gdx.input.isKeyPressed(Keys.DOWN))
 			currentTetromino.moveDown(board);
-		if (Gdx.input.isKeyPressed(Keys.LEFT))
+
+		if (Gdx.input.isKeyJustPressed(Keys.LEFT)) {
 			currentTetromino.moveLeft(board);
-		if (Gdx.input.isKeyPressed(Keys.RIGHT))
+			timerLeft = 0.0f;
+		}
+		if (Gdx.input.isKeyPressed(Keys.LEFT)) {
+			timerLeft += Gdx.graphics.getDeltaTime();
+			if (timerLeft > moveTimerThreshold)
+				currentTetromino.moveLeft(board);
+		}
+
+		if (Gdx.input.isKeyJustPressed(Keys.RIGHT)) {
 			currentTetromino.moveRight(board);
+			timerRight = 0.0f;
+		}
+		if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
+			timerRight += Gdx.graphics.getDeltaTime();
+			if (timerRight > moveTimerThreshold)
+				currentTetromino.moveRight(board);
+		}
 
 		// Set the piece in the board definitely
-		if (!isGameOver && timeElapsedSinceTouchingGround >= maximumTimeToSetAPieceAfterTouching) {
+		if (!isGameOver && timeElapsedSinceTouchingGround >= timeToSetAPieceAfterTouching) {
 			timeElapsedSinceTouchingGround = 0f;
 			if (this.currentTetromino.moveDown(this.board) == false) {
 				this.boardTetrominos.add(currentTetromino);
@@ -100,9 +117,8 @@ public class MyTetrisGame extends ApplicationAdapter {
 
 	private void drawBoardTetrominos() {
 
-		shapeRenderer.begin(ShapeType.Filled);
 		shapeRenderer.set(ShapeType.Filled);
-
+		shapeRenderer.begin(ShapeType.Filled);
 		// Draw every Tetromino block individually
 		for (Tetromino tetromino : this.boardTetrominos) {
 			shapeRenderer.setColor(tetromino.getColor());
