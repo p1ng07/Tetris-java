@@ -63,7 +63,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 
 	}
 
-	// TODO: Add rotations and moving left and right
+	// TODO: Add rotations, and timings for move right and left
 	@Override
 	public void render() {
 		ScreenUtils.clear(Color.LIGHT_GRAY);
