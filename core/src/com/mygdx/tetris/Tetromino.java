@@ -39,10 +39,7 @@ public class Tetromino extends Object {
             blocks[1] = new Square(0, 0);
             blocks[2] = new Square(-1, 0);
             blocks[3] = new Square(-2, 0);
-            this.color.r = 0;
-            this.color.g = 1;
-            this.color.b = 1;
-            this.color.a = 1;
+            this.color = Color.CYAN;
             break;
         // Draw a O shape
         case 4:
@@ -131,5 +128,48 @@ public class Tetromino extends Object {
         }
         return true;
 
+    }
+
+    public void moveRight(boolean[][] board) {
+        // Set all of the current tetromino squares to false
+        for (Square square : this.blocks)
+            board[square.col][square.row] = false;
+
+        // Check if we are at the left most square of the board or if the left square of
+        // the board is filled
+        for (Square square : this.blocks) {
+            if (square.col + 1 > MyTetrisGame.cols - 1 || board[square.col + 1][square.row]) {
+                for (Square square2 : this.blocks)
+                    board[square2.col][square2.row] = true;
+                return;
+            }
+        }
+
+        for (Square square : this.blocks) {
+            square.col++;
+            board[square.col][square.row] = true;
+        }
+    }
+
+    public void moveLeft(boolean[][] board) {
+        // Set all of the current tetromino squares to false
+        for (Square square : this.blocks)
+            board[square.col][square.row] = false;
+
+        // Check if we are at the left most square of the board or if the left square of
+        // the board is filled
+        for (Square square : this.blocks) {
+            if (square.col - 1 < 0 || board[square.col - 1][square.row]) {
+
+                for (Square square2 : this.blocks)
+                    board[square2.col][square2.row] = true;
+                return;
+            }
+        }
+
+        for (Square square : this.blocks) {
+            square.col--;
+            board[square.col][square.row] = true;
+        }
     }
 }

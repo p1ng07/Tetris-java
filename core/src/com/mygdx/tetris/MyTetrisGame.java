@@ -35,9 +35,11 @@ public class MyTetrisGame extends ApplicationAdapter {
 	boolean board[][] = new boolean[cols][rows];
 
 	ShapeRenderer shapeRenderer;
-	private long milisecondsToWaitForDrop = 1000;
-	private float timeElapsed;
-	private float timeToGoDown = 1.0f;
+
+	private float timeElapsedSinceTouchingGround;
+	private float maximumTimeToSetAPieceAfterTouching = 1.0f;
+
+	private float timeElapsedSinceRight = 0.0f;
 
 	@Override
 	public void create() {
@@ -71,13 +73,18 @@ public class MyTetrisGame extends ApplicationAdapter {
 		if (!isGameOver)
 			drawCurrentTetromino();
 
-		timeElapsed += Gdx.graphics.getDeltaTime();
+		timeElapsedSinceTouchingGround += Gdx.graphics.getDeltaTime();
 
-		if (Gdx.input.isKeyPressed(Keys.DOWN)) {
+		if (Gdx.input.isKeyPressed(Keys.DOWN))
 			currentTetromino.moveDown(board);
-		}
-		if (!isGameOver && timeElapsed >= timeToGoDown) {
-			timeElapsed = 0f;
+		if (Gdx.input.isKeyPressed(Keys.LEFT))
+			currentTetromino.moveLeft(board);
+		if (Gdx.input.isKeyPressed(Keys.RIGHT))
+			currentTetromino.moveRight(board);
+
+		// Set the piece in the board definitely
+		if (!isGameOver && timeElapsedSinceTouchingGround >= maximumTimeToSetAPieceAfterTouching) {
+			timeElapsedSinceTouchingGround = 0f;
 			if (this.currentTetromino.moveDown(this.board) == false) {
 				this.boardTetrominos.add(currentTetromino);
 
