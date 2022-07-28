@@ -100,6 +100,7 @@ public class Tetromino extends Object {
         }
     }
 
+    // Returns false if tetromino cant move down
     public boolean moveDown(boolean[][] board) {
         boolean canMoveDown = true;
         // Check if we are at the bottom of the board

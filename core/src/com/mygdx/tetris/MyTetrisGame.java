@@ -68,7 +68,8 @@ public class MyTetrisGame extends ApplicationAdapter {
 
 		drawMainBoard();
 		drawBoardTetrominos();
-		drawCurrentTetromino();
+		if (!isGameOver)
+			drawCurrentTetromino();
 
 		timeElapsed += Gdx.graphics.getDeltaTime();
 
@@ -77,7 +78,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 		}
 		if (!isGameOver && timeElapsed >= timeToGoDown) {
 			timeElapsed = 0f;
-			if (!this.currentTetromino.moveDown(this.board)) {
+			if (this.currentTetromino.moveDown(this.board) == false) {
 				this.boardTetrominos.add(currentTetromino);
 
 				Tetromino newTetromino = new Tetromino(cols / 2, rows - 1);
