@@ -13,7 +13,6 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.mygdx.tetris.Tetromino.Square;
 
 public class MyTetrisGame extends ApplicationAdapter {
 	static int BOARD_HEIGHT = 800;
@@ -79,6 +78,15 @@ public class MyTetrisGame extends ApplicationAdapter {
 		if (Gdx.input.isKeyPressed(Keys.DOWN))
 			currentTetromino.moveDown(board);
 
+		if (Gdx.input.isKeyJustPressed(Keys.UP)) {
+			for (Point point : this.currentTetromino.blocks)
+				this.board[point.x][point.y] = false;
+
+			currentTetromino.rotate(board, true, true);
+			for (Point point : this.currentTetromino.blocks)
+				this.board[point.x][point.y] = false;
+		}
+
 		if (Gdx.input.isKeyJustPressed(Keys.LEFT)) {
 			currentTetromino.moveLeft(board);
 			timerLeft = 0.0f;
@@ -117,12 +125,12 @@ public class MyTetrisGame extends ApplicationAdapter {
 
 	private void drawBoardTetrominos() {
 
-		shapeRenderer.set(ShapeType.Filled);
 		shapeRenderer.begin(ShapeType.Filled);
+		shapeRenderer.set(ShapeType.Filled);
 		// Draw every Tetromino block individually
 		for (Tetromino tetromino : this.boardTetrominos) {
 			shapeRenderer.setColor(tetromino.getColor());
-			for (Square position : tetromino.blocks)
+			for (Point position : tetromino.blocks)
 				drawSquareOnMainBoard(position);
 		}
 		shapeRenderer.end();
@@ -133,23 +141,31 @@ public class MyTetrisGame extends ApplicationAdapter {
 		shapeRenderer.begin(ShapeType.Filled);
 		shapeRenderer.setColor(this.currentTetromino.getColor());
 		shapeRenderer.set(ShapeType.Filled);
+		for (int i = 0; i < 4; i++) {
+			if (i == 0) {
+				shapeRenderer.setColor(Color.WHITE);
+			} else {
+				shapeRenderer.setColor(this.currentTetromino.getColor());
+			}
+			drawSquareOnMainBoard(this.currentTetromino.blocks[i]);
+		}
 
 		// Draw every Tetromino block individually
-		for (Square position : this.currentTetromino.blocks) {
-			drawSquareOnMainBoard(position);
-		}
+		// for (Point position : this.currentTetromino.blocks) {
+		// drawSquareOnMainBoard(position);
+		// }
 
 		shapeRenderer.end();
 	}
 
-	private void drawSquareOnMainBoard(Square position) {
-		shapeRenderer.rect(position.col * SQUARE_SIZE, BOARD_HEIGHT - (rows - position.row) * SQUARE_SIZE, SQUARE_SIZE,
+	private void drawSquareOnMainBoard(Point position) {
+		shapeRenderer.rect(position.x * SQUARE_SIZE, BOARD_HEIGHT - (rows - position.y) * SQUARE_SIZE, SQUARE_SIZE,
 				SQUARE_SIZE);
 	}
 
 	private boolean isTetrominoColliding(Tetromino tetromino) {
-		for (Square square : tetromino.blocks) {
-			if (this.board[square.col][square.row]) {
+		for (Point square : tetromino.blocks) {
+			if (this.board[square.x][square.y]) {
 				return true;
 			}
 		}
