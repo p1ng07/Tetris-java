@@ -23,15 +23,13 @@ public class MyTetrisGame extends ApplicationAdapter {
 
 	private boolean isGameOver = false;
 
-	private Stage stage;
-
 	// New tetromino in the top left corner
 	Tetromino currentTetromino = new Tetromino(cols / 2, rows - 1);
 
 	Vector<Tetromino> boardTetrominos = new Vector<Tetromino>();
 
 	// If board[col][row] is set to true, then a piece is there
-	boolean board[][] = new boolean[cols][rows];
+	static boolean board[][] = new boolean[cols][rows + 2];
 
 	ShapeRenderer shapeRenderer;
 
@@ -45,17 +43,6 @@ public class MyTetrisGame extends ApplicationAdapter {
 	@Override
 	public void create() {
 		this.shapeRenderer = new ShapeRenderer();
-		this.stage = new Stage();
-
-		this.stage.addListener(new InputListener() {
-			public boolean keyDown(InputEvent event, int keycode) {
-				if (keycode == Input.Keys.DOWN) {
-					currentTetromino.moveDown(board);
-					return true;
-				}
-				return false;
-			}
-		});
 
 		// Reset the game board
 		for (int i = 0; i < cols; i++)
@@ -113,8 +100,11 @@ public class MyTetrisGame extends ApplicationAdapter {
 			if (this.currentTetromino.moveDown(this.board) == false) {
 				this.boardTetrominos.add(currentTetromino);
 
+				for (Point point : this.currentTetromino.blocks)
+					board[point.x][point.y] = true;
+
 				Tetromino newTetromino = new Tetromino(cols / 2, rows - 1);
-				if (isTetrominoColliding(newTetromino)) {
+				if (isTetrominoColliding(newTetromino.blocks)) {
 					isGameOver = true;
 				} else {
 					this.currentTetromino = newTetromino;
@@ -163,9 +153,9 @@ public class MyTetrisGame extends ApplicationAdapter {
 				SQUARE_SIZE);
 	}
 
-	private boolean isTetrominoColliding(Tetromino tetromino) {
-		for (Point square : tetromino.blocks) {
-			if (this.board[square.x][square.y]) {
+	private boolean isTetrominoColliding(Point[] points) {
+		for (Point square : points) {
+			if (MyTetrisGame.board[square.x][square.y]) {
 				return true;
 			}
 		}
@@ -184,4 +174,5 @@ public class MyTetrisGame extends ApplicationAdapter {
 		}
 		shapeRenderer.end();
 	}
+
 }

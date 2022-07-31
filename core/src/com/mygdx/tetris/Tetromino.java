@@ -91,10 +91,6 @@ public class Tetromino {
             if (square.y - 1 < 0)
                 return false;
 
-        // Set all of the current tetromino squares to false
-        for (Point square : this.blocks)
-            board[square.x][square.y] = false;
-
         // Check if the squares bellow the current tetromino are occupied
         // If they are filled, then we cant move down
         for (Point square : this.blocks)
@@ -102,56 +98,35 @@ public class Tetromino {
                 canMoveDown = false;
 
         if (!canMoveDown) {
-            for (Point square : this.blocks)
-                board[square.x][square.y] = true;
             return false;
         }
         for (Point square : this.blocks) {
             square.y--;
-            board[square.x][square.y] = true;
         }
         return true;
     }
 
     public void moveRight(boolean[][] board) {
-        // Set all of the current tetromino squares to false
-        for (Point square : this.blocks)
-            board[square.x][square.y] = false;
-
         // Check if we are at the left most square of the board or if the left square of
         // the board is filled
-        for (Point square : this.blocks) {
-            if (square.x + 1 > MyTetrisGame.cols - 1 || board[square.x + 1][square.y]) {
-                for (Point square2 : this.blocks)
-                    board[square2.x][square2.y] = true;
+        for (Point square : this.blocks)
+            if (square.x + 1 > MyTetrisGame.cols - 1 || board[square.x + 1][square.y])
                 return;
-            }
-        }
 
         for (Point square : this.blocks) {
             square.x++;
-            board[square.x][square.y] = true;
         }
     }
 
     public void moveLeft(boolean[][] board) {
-        // Set all of the current tetromino squares to false
-        for (Point square : this.blocks)
-            board[square.x][square.y] = false;
-
         // Check if we are at the left most square of the board or if the left square of
         // the board is filled
         for (Point square : this.blocks)
             if (square.x - 1 < 0 || board[square.x - 1][square.y])
-                for (Point square2 : this.blocks) {
-                    board[square2.x][square2.y] = true;
-                    return;
-                }
+                return;
 
-        for (Point square : this.blocks) {
+        for (Point square : this.blocks)
             square.x--;
-            board[square.x][square.y] = true;
-        }
     }
 
     public void rotate(boolean[][] board, boolean clockwise, Boolean offset) {
