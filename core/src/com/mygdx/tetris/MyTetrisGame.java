@@ -4,14 +4,10 @@ import java.util.Vector;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 public class MyTetrisGame extends ApplicationAdapter {
@@ -104,7 +100,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 					board[point.x][point.y] = true;
 
 				Tetromino newTetromino = new Tetromino(cols / 2, rows - 1);
-				if (isTetrominoColliding(newTetromino.blocks)) {
+				if (!arePositionsValid(newTetromino.blocks)) {
 					isGameOver = true;
 				} else {
 					this.currentTetromino = newTetromino;
@@ -153,13 +149,16 @@ public class MyTetrisGame extends ApplicationAdapter {
 				SQUARE_SIZE);
 	}
 
-	private boolean isTetrominoColliding(Point[] points) {
+	// Checks if every point is within board bounds and if every point isn't set in
+	// the board
+	public static boolean arePositionsValid(Point[] points) {
 		for (Point square : points) {
-			if (MyTetrisGame.board[square.x][square.y]) {
-				return true;
-			}
+			if (square.x < 0 || square.x > cols - 1 || square.y < 0 || square.y > rows)
+				return false;
+			if (MyTetrisGame.board[square.x][square.y])
+				return false;
 		}
-		return false;
+		return true;
 
 	}
 

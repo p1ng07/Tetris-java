@@ -133,6 +133,11 @@ public class Tetromino {
         for (Point point : this.blocks) {
             point.rotate(this.blocks[0], clockwise);
         }
+        if (!MyTetrisGame.arePositionsValid(this.blocks)) {
+            for (Point point : this.blocks) {
+                point.rotate(this.blocks[0], !clockwise);
+            }
+        }
 
     }
 }
