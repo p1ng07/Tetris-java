@@ -46,7 +46,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 				this.board[i][j] = false;
 	}
 
-	// TODO: Add rotations, ghost piece and hard drop
+	// TODO: ghost piece and hard drop
 	@Override
 	public void render() {
 		ScreenUtils.clear(Color.LIGHT_GRAY);
@@ -62,18 +62,15 @@ public class MyTetrisGame extends ApplicationAdapter {
 			currentTetromino.moveDown(board);
 
 		if (Gdx.input.isKeyJustPressed(Keys.UP)) {
-			for (Point point : this.currentTetromino.blocks)
-				this.board[point.x][point.y] = false;
-
-			currentTetromino.rotate(board, true, true);
-			for (Point point : this.currentTetromino.blocks)
-				this.board[point.x][point.y] = false;
+			currentTetromino.rotate(true, true);
+			System.out.println("The new rotation index is " + this.currentTetromino.rotationIndex);
 		}
 
 		if (Gdx.input.isKeyJustPressed(Keys.LEFT)) {
 			currentTetromino.moveLeft(board);
 			timerLeft = 0.0f;
 		}
+
 		if (Gdx.input.isKeyPressed(Keys.LEFT)) {
 			timerLeft += Gdx.graphics.getDeltaTime();
 			if (timerLeft > moveTimerThreshold)
@@ -93,11 +90,11 @@ public class MyTetrisGame extends ApplicationAdapter {
 		// Set the piece in the board definitely
 		if (!isGameOver && timeElapsedSinceTouchingGround >= timeToSetAPieceAfterTouching) {
 			timeElapsedSinceTouchingGround = 0f;
-			if (this.currentTetromino.moveDown(this.board) == false) {
+			if (this.currentTetromino.moveDown(MyTetrisGame.board) == false) {
 				this.boardTetrominos.add(currentTetromino);
-
-				for (Point point : this.currentTetromino.blocks)
+				for (Point point : this.currentTetromino.blocks) {
 					board[point.x][point.y] = true;
+				}
 
 				Tetromino newTetromino = new Tetromino(cols / 2, rows - 1);
 				if (!arePositionsValid(newTetromino.blocks)) {

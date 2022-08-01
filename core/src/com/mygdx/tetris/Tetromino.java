@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.Color;
 public class Tetromino {
     private Color color = Color.ORANGE;
     Point blocks[] = new Point[4];
+    Integer rotationIndex = 0;
+    private PieceType type = PieceType.EVERYTHING_EXCEPT_I_O;
 
     // Generates a random Tetris Piece
     // The col and line given are the reference square for the piece
@@ -36,6 +38,7 @@ public class Tetromino {
             blocks[2] = new Point(1, 0);
             blocks[3] = new Point(-2, 0);
             this.color = Color.CYAN;
+            this.type = PieceType.I;
             break;
         case 4:
             // Draw a O shape
@@ -44,6 +47,7 @@ public class Tetromino {
             blocks[2] = new Point(-1, 0);
             blocks[3] = new Point(0, 0);
             this.color = Color.YELLOW;
+            this.type = PieceType.O;
             break;
         case 5:
             // Draw a S shape
@@ -129,15 +133,74 @@ public class Tetromino {
             square.x--;
     }
 
-    public void rotate(boolean[][] board, boolean clockwise, Boolean offset) {
+    // TODO: The algorithm isnt checking if the rotation is valid properly
+    public void rotate(boolean clockwise, Boolean offset) {
+
+        // Apply true rotation to every block
         for (Point point : this.blocks) {
             point.rotate(this.blocks[0], clockwise);
         }
-        if (!MyTetrisGame.arePositionsValid(this.blocks)) {
-            for (Point point : this.blocks) {
-                point.rotate(this.blocks[0], !clockwise);
+
+        if (!offset) {
+            return;
+        }
+        Point newBlocks[] = new Point[] { new Point(), new Point(), new Point(), new Point() };
+
+        boolean valid = false;
+
+        int oldRotationIndex = this.rotationIndex;
+
+        rotationIndex = clockwise ? rotationIndex + 1 : rotationIndex - 1;
+        rotationIndex = mod(rotationIndex, 4);
+
+        Point[][] offsetToUse = DEFAULT_OFFSET;
+        if (type == PieceType.I) {
+            offsetToUse = I_OFFSET;
+        } else if (type == PieceType.O) {
+            offsetToUse = O_OFFSET;
+        }
+
+        for (int j = 0; j < offsetToUse[rotationIndex].length; j++) {
+            for (int i = 0; i < 4; i++) {
+                newBlocks[i].x = this.blocks[i].x
+                        + (offsetToUse[oldRotationIndex][j].x - offsetToUse[rotationIndex][j].x);
+                newBlocks[i].y = this.blocks[i].y
+                        + (offsetToUse[oldRotationIndex][j].y - offsetToUse[rotationIndex][j].y);
+            }
+            if (MyTetrisGame.arePositionsValid(newBlocks)) {
+                this.blocks = newBlocks;
+                valid = true;
+                break;
             }
         }
 
+        if (!valid) {
+            rotationIndex = oldRotationIndex;
+            this.rotate(!clockwise, false);
+        }
+
+    }
+
+    static Point[][] O_OFFSET = { { new Point(0, 0) }, { new Point(0, -1) }, { new Point(-1, -1) },
+            { new Point(-1, 0) } };
+
+    static Point[][] I_OFFSET = {
+            { new Point(0, 0), new Point(-1, 0), new Point(2, 0), new Point(-1, 0), new Point(2, 0) },
+            { new Point(-1, 0), new Point(0, 0), new Point(0, 0), new Point(0, 1), new Point(0, -2) },
+            { new Point(-1, 1), new Point(1, 1), new Point(-2, 1), new Point(1, 0), new Point(-2, 0) },
+            { new Point(0, 1), new Point(0, 1), new Point(0, 1), new Point(0, -1), new Point(0, 2) } };
+
+    static Point[][] DEFAULT_OFFSET = {
+            { new Point(0, 0), new Point(0, 0), new Point(+0, -0), new Point(0, +0), new Point(+0, +0) },
+            { new Point(0, 0), new Point(1, 0), new Point(+1, -1), new Point(0, +2), new Point(+1, +2) },
+            { new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0) },
+            { new Point(0, 0), new Point(-1, 0), new Point(-1, -1), new Point(0, +2), new Point(-1, +2) } };
+
+    public Integer mod(int x, int m) {
+        return (x % m + m) % m;
+    }
+
+    enum PieceType {
+        I, O, EVERYTHING_EXCEPT_I_O
     }
 }
