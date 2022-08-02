@@ -17,21 +17,21 @@ public class MyTetrisGame extends ApplicationAdapter {
 	static int BOARD_HEIGHT = 800;
 	static int BOARD_WIDTH = BOARD_HEIGHT / 2;
 	static int cols = 10;
-	static int rows = 20;
+	static int rows = 22;
 	static int SQUARE_SIZE = BOARD_WIDTH / cols;
 
 	private boolean isGameOver = false;
 
 	// New tetromino in the top left corner
-	Tetromino currentTetromino = new Tetromino(cols / 2, rows - 1);
-	Tetromino ghostTetromino = new Tetromino(cols / 2, rows - 1);
-	Tetromino nextPiece = new Tetromino(cols / 2, rows - 1);
+	Tetromino currentTetromino = new Tetromino(cols / 2, rows - 3);
+	Tetromino ghostTetromino = new Tetromino(cols / 2, rows - 3);
+	Tetromino nextPiece = new Tetromino(cols / 2, rows - 3);
 
 	Vector<Tetromino> boardTetrominos = new Vector<Tetromino>();
 
 	// If board[col][row] is set to true, then a piece is there
-	static boolean board[][] = new boolean[cols][rows + 2];
-	static Color[][] boardColors = new Color[cols][rows + 2];
+	static boolean board[][] = new boolean[cols][rows];
+	static Color[][] boardColors = new Color[cols][rows];
 
 	ShapeRenderer shapeRenderer;
 	private Sound backgroundMusic;
@@ -65,8 +65,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 			}
 	}
 
-	// TODO: Add hard drop, refactor the way piece are set to the board using the
-	// already defined boardColors ard board arrays
+	// TODO: Add hability to clear lines
 	@Override
 	public void render() {
 		ScreenUtils.clear(Color.LIGHT_GRAY);
@@ -133,10 +132,61 @@ public class MyTetrisGame extends ApplicationAdapter {
 					isGameOver = true;
 				} else {
 					this.currentTetromino = this.nextPiece;
-					nextPiece = new Tetromino(cols / 2, rows - 1);
+					nextPiece = new Tetromino(cols / 2, rows - 3);
 				}
 			}
+			if (checkForLinesToClear()) {
+				clearLines();
+			}
 		}
+	}
+
+	private void clearLines() {
+
+		for (int y = rows - 1; y > -1; y--) {
+			Integer numberOfFilledSquares = 0;
+			for (int x = 0; x < cols; x++) {
+				if (board[x][y])
+					numberOfFilledSquares++;
+			}
+			if (numberOfFilledSquares == cols) {
+				// Render white squares on every block that is going to be cleared
+				shapeRenderer.begin(ShapeType.Filled);
+				shapeRenderer.setColor(Color.WHITE);
+				for (int x = 0; x < cols; x++) {
+					drawSquareOnMainBoard(new Point(x, y));
+				}
+				shapeRenderer.end();
+
+				// Shift all of the lines above it down
+				for (int row = y; row < rows - 1; row++) {
+					for (int x = 0; x < cols; x++) {
+						board[x][row] = board[x][row + 1];
+						boardColors[x][row] = boardColors[x][row + 1];
+					}
+				}
+				// manually set the last line to nothing
+				for (int x = 0; x < cols; x++) {
+					board[x][rows - 1] = false;
+				}
+			}
+
+		}
+	}
+
+	// Returns true if there are line to clear
+	private Boolean checkForLinesToClear() {
+		for (int y = 0; y < rows; y++) {
+			Integer numberOfFilledSquares = 0;
+			for (int x = 0; x < cols; x++) {
+				if (board[x][y])
+					numberOfFilledSquares++;
+			}
+			if (numberOfFilledSquares == cols) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void setPieceIntoBoard(Tetromino tetromino) {
@@ -185,7 +235,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 		shapeRenderer.setColor(this.nextPiece.getColor());
 		for (final Point position : this.nextPiece.blocks) {
 			shapeRenderer.rect((BOARD_WIDTH + nextPieceXOffset) + position.x * SQUARE_SIZE,
-					BOARD_HEIGHT - nextPieceYOffset - (rows - position.y) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+					BOARD_HEIGHT - nextPieceYOffset - (rows - 2 - position.y) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
 		}
 
 		shapeRenderer.setColor(Color.WHITE);
@@ -222,6 +272,10 @@ public class MyTetrisGame extends ApplicationAdapter {
 					shapeRenderer.setColor(isGameOver ? Color.GRAY : boardColors[x][y]);
 					drawSquareOnMainBoard(new Point(x, y));
 				}
+				// if (x == 0 && y == 0) {
+				// shapeRenderer.setColor(Color.PINK);
+				// drawSquareOnMainBoard(new Point(x, y));
+				// }
 			}
 		}
 		shapeRenderer.end();
@@ -242,7 +296,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 	}
 
 	private void drawSquareOnMainBoard(final Point position) {
-		shapeRenderer.rect(position.x * SQUARE_SIZE, BOARD_HEIGHT - (rows - position.y) * SQUARE_SIZE, SQUARE_SIZE,
+		shapeRenderer.rect(position.x * SQUARE_SIZE, BOARD_HEIGHT - (rows - 2 - position.y) * SQUARE_SIZE, SQUARE_SIZE,
 				SQUARE_SIZE);
 	}
 
@@ -265,7 +319,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 		shapeRenderer.set(ShapeType.Filled);
 		for (int i = 0; i < cols; i++) {
 			for (int j = 0; j < rows; j++) {
-				shapeRenderer.rect(i * SQUARE_SIZE, j * SQUARE_SIZE, 0, 0, SQUARE_SIZE - 1, SQUARE_SIZE - 1, 1, 1, 0);
+				shapeRenderer.rect(i * SQUARE_SIZE, j * SQUARE_SIZE, 0, 0, SQUARE_SIZE, SQUARE_SIZE, 1, 1, 0);
 			}
 		}
 		shapeRenderer.end();
