@@ -5,14 +5,13 @@ import java.util.Vector;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.mygdx.tetris.Tetromino.PieceType;
 
 public class MyTetrisGame extends ApplicationAdapter {
 	static int BOARD_HEIGHT = 800;
@@ -33,6 +32,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 	static boolean board[][] = new boolean[cols][rows + 2];
 
 	ShapeRenderer shapeRenderer;
+	private Sound backgroundMusic;
 
 	private float timeElapsedSinceTouchingGround;
 	private float timeToSetAPieceAfterTouching = 0.5f;
@@ -43,19 +43,18 @@ public class MyTetrisGame extends ApplicationAdapter {
 	private int nextPieceXOffset = 30;
 	private int nextPieceYOffset = 100;
 
-	private SpriteBatch batch;
-	private BitmapFont font;
-
 	@Override
 	public void create() {
-		this.font = new BitmapFont();
-		this.batch = new SpriteBatch();
+		this.backgroundMusic = Gdx.audio.newSound(Gdx.files.internal("Tetris.mp3"));
+		long id = backgroundMusic.play();
+		backgroundMusic.setLooping(id, true);
+
 		this.shapeRenderer = new ShapeRenderer();
 
 		// Reset the game board
 		for (int i = 0; i < cols; i++)
 			for (int j = 0; j < rows; j++)
-				this.board[i][j] = false;
+				MyTetrisGame.board[i][j] = false;
 	}
 
 	// TODO: ghost piece and hard drop
@@ -163,7 +162,10 @@ public class MyTetrisGame extends ApplicationAdapter {
 		shapeRenderer.set(ShapeType.Filled);
 		// Draw every Tetromino block individually
 		for (final Tetromino tetromino : this.boardTetrominos) {
-			shapeRenderer.setColor(tetromino.getColor());
+			if (this.isGameOver)
+				shapeRenderer.setColor(Color.GRAY);
+			else
+				shapeRenderer.setColor(tetromino.getColor());
 			for (final Point position : tetromino.blocks)
 				drawSquareOnMainBoard(position);
 		}
