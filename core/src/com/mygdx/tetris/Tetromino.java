@@ -8,12 +8,12 @@ public class Tetromino {
     private Color color = Color.ORANGE;
     Point blocks[] = new Point[4];
     Integer rotationIndex = 0;
-    private PieceType type = PieceType.EVERYTHING_EXCEPT_I_O;
+    PieceType type = PieceType.EVERYTHING_EXCEPT_I_O;
 
     // Generates a random Tetris Piece
     // The col and line given are the reference square for the piece
-    public Tetromino(int col, int line) {
-        int randomNum = ThreadLocalRandom.current().nextInt(1, 7 + 1);
+    public Tetromino(final int col, final int line) {
+        final int randomNum = ThreadLocalRandom.current().nextInt(1, 7 + 1);
         switch (randomNum) {
         case 1:
             // Draw a L shape
@@ -77,7 +77,7 @@ public class Tetromino {
         }
 
         // Add the board coordinates to local coordinates
-        for (Point position : blocks) {
+        for (final Point position : blocks) {
             position.x += col;
             position.y += line;
         }
@@ -88,67 +88,66 @@ public class Tetromino {
     }
 
     // Returns false if tetromino cant move down
-    public boolean moveDown(boolean[][] board) {
+    public boolean moveDown(final boolean[][] board) {
         boolean canMoveDown = true;
         // Check if we are at the bottom of the board
-        for (Point square : this.blocks)
+        for (final Point square : this.blocks)
             if (square.y - 1 < 0)
                 return false;
 
         // Check if the squares bellow the current tetromino are occupied
         // If they are filled, then we cant move down
-        for (Point square : this.blocks)
+        for (final Point square : this.blocks)
             if (board[square.x][square.y - 1])
                 canMoveDown = false;
 
         if (!canMoveDown) {
             return false;
         }
-        for (Point square : this.blocks) {
+        for (final Point square : this.blocks) {
             square.y--;
         }
         return true;
     }
 
-    public void moveRight(boolean[][] board) {
+    public void moveRight(final boolean[][] board) {
         // Check if we are at the left most square of the board or if the left square of
         // the board is filled
-        for (Point square : this.blocks)
+        for (final Point square : this.blocks)
             if (square.x + 1 > MyTetrisGame.cols - 1 || board[square.x + 1][square.y])
                 return;
 
-        for (Point square : this.blocks) {
+        for (final Point square : this.blocks) {
             square.x++;
         }
     }
 
-    public void moveLeft(boolean[][] board) {
+    public void moveLeft(final boolean[][] board) {
         // Check if we are at the left most square of the board or if the left square of
         // the board is filled
-        for (Point square : this.blocks)
+        for (final Point square : this.blocks)
             if (square.x - 1 < 0 || board[square.x - 1][square.y])
                 return;
 
-        for (Point square : this.blocks)
+        for (final Point square : this.blocks)
             square.x--;
     }
 
-    // TODO: The algorithm isnt checking if the rotation is valid properly
-    public void rotate(boolean clockwise, Boolean offset) {
+    public void rotate(final boolean clockwise, final Boolean offset) {
 
         // Apply true rotation to every block
-        for (Point point : this.blocks) {
+        for (final Point point : this.blocks) {
             point.rotate(this.blocks[0], clockwise);
         }
 
         if (!offset) {
             return;
         }
-        Point newBlocks[] = new Point[] { new Point(), new Point(), new Point(), new Point() };
+        final Point newBlocks[] = new Point[] { new Point(), new Point(), new Point(), new Point() };
 
         boolean valid = false;
 
-        int oldRotationIndex = this.rotationIndex;
+        final int oldRotationIndex = this.rotationIndex;
 
         rotationIndex = clockwise ? rotationIndex + 1 : rotationIndex - 1;
         rotationIndex = mod(rotationIndex, 4);
@@ -196,7 +195,7 @@ public class Tetromino {
             { new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0) },
             { new Point(0, 0), new Point(-1, 0), new Point(-1, -1), new Point(0, +2), new Point(-1, +2) } };
 
-    public Integer mod(int x, int m) {
+    public Integer mod(final int x, final int m) {
         return (x % m + m) % m;
     }
 

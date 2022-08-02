@@ -8,14 +8,14 @@ public class Point {
         this.y = 0;
     }
 
-    public Point(int col, int row) {
+    public Point(final int col, final int row) {
         this.x = col;
         this.y = row;
     }
 
-    public void rotate(Point origin, boolean clockwise) {
-        Point relativePosition = new Point(this.x - origin.x, this.y - origin.y);
-        Point rotationMatrix[] = new Point[2];
+    public void rotate(final Point origin, final boolean clockwise) {
+        final Point relativePosition = new Point(this.x - origin.x, this.y - origin.y);
+        final Point rotationMatrix[] = new Point[2];
         if (clockwise) {
             rotationMatrix[0] = new Point(0, 1);
             rotationMatrix[1] = new Point(-1, 0);
@@ -25,8 +25,8 @@ public class Point {
         }
 
         // Dot product of the rotationMatrix . relativePosition
-        int newX = (rotationMatrix[0].x * relativePosition.x) + (rotationMatrix[0].y * relativePosition.y);
-        int newY = (rotationMatrix[1].x * relativePosition.x) + (rotationMatrix[1].y * relativePosition.y);
+        final int newX = (rotationMatrix[0].x * relativePosition.x) + (rotationMatrix[0].y * relativePosition.y);
+        final int newY = (rotationMatrix[1].x * relativePosition.x) + (rotationMatrix[1].y * relativePosition.y);
         this.x = newX + origin.x;
         this.y = newY + origin.y;
     }

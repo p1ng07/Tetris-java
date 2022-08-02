@@ -6,9 +6,13 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.mygdx.tetris.Tetromino.PieceType;
 
 public class MyTetrisGame extends ApplicationAdapter {
 	static int BOARD_HEIGHT = 800;
@@ -21,6 +25,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 
 	// New tetromino in the top left corner
 	Tetromino currentTetromino = new Tetromino(cols / 2, rows - 1);
+	Tetromino nextPiece = new Tetromino(cols / 2, rows - 1);
 
 	Vector<Tetromino> boardTetrominos = new Vector<Tetromino>();
 
@@ -34,10 +39,17 @@ public class MyTetrisGame extends ApplicationAdapter {
 
 	private float timerLeft;
 	private float timerRight;
-	private float moveTimerThreshold = 0.3f;
+	private final float moveTimerThreshold = 0.3f;
+	private int nextPieceXOffset = 30;
+	private int nextPieceYOffset = 100;
+
+	private SpriteBatch batch;
+	private BitmapFont font;
 
 	@Override
 	public void create() {
+		this.font = new BitmapFont();
+		this.batch = new SpriteBatch();
 		this.shapeRenderer = new ShapeRenderer();
 
 		// Reset the game board
@@ -53,6 +65,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 
 		drawMainBoard();
 		drawBoardTetrominos();
+		drawNextPiece();
 		if (!isGameOver)
 			drawCurrentTetromino();
 
@@ -68,21 +81,25 @@ public class MyTetrisGame extends ApplicationAdapter {
 
 		if (Gdx.input.isKeyJustPressed(Keys.LEFT)) {
 			currentTetromino.moveLeft(board);
+			timeElapsedSinceTouchingGround = 0.0f;
 			timerLeft = 0.0f;
 		}
 
 		if (Gdx.input.isKeyPressed(Keys.LEFT)) {
 			timerLeft += Gdx.graphics.getDeltaTime();
+			timeElapsedSinceTouchingGround = 0.0f;
 			if (timerLeft > moveTimerThreshold)
 				currentTetromino.moveLeft(board);
 		}
 
 		if (Gdx.input.isKeyJustPressed(Keys.RIGHT)) {
 			currentTetromino.moveRight(board);
+			timeElapsedSinceTouchingGround = 0.0f;
 			timerRight = 0.0f;
 		}
 		if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
 			timerRight += Gdx.graphics.getDeltaTime();
+			timeElapsedSinceTouchingGround = 0.0f;
 			if (timerRight > moveTimerThreshold)
 				currentTetromino.moveRight(board);
 		}
@@ -92,18 +109,52 @@ public class MyTetrisGame extends ApplicationAdapter {
 			timeElapsedSinceTouchingGround = 0f;
 			if (this.currentTetromino.moveDown(MyTetrisGame.board) == false) {
 				this.boardTetrominos.add(currentTetromino);
-				for (Point point : this.currentTetromino.blocks) {
+				for (final Point point : this.currentTetromino.blocks) {
 					board[point.x][point.y] = true;
 				}
 
-				Tetromino newTetromino = new Tetromino(cols / 2, rows - 1);
+				final Tetromino newTetromino = new Tetromino(cols / 2, rows - 1);
 				if (!arePositionsValid(newTetromino.blocks)) {
 					isGameOver = true;
 				} else {
-					this.currentTetromino = newTetromino;
+					this.currentTetromino = this.nextPiece;
+					nextPiece = new Tetromino(cols / 2, rows - 1);
 				}
 			}
 		}
+	}
+
+	private void drawNextPiece() {
+
+		shapeRenderer.begin(ShapeType.Filled);
+		// Draw every Tetromino block individually
+		shapeRenderer.setColor(this.nextPiece.getColor());
+		for (final Point position : this.nextPiece.blocks) {
+			shapeRenderer.rect((BOARD_WIDTH + nextPieceXOffset) + position.x * SQUARE_SIZE,
+					BOARD_HEIGHT - nextPieceYOffset - (rows - position.y) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+		}
+
+		shapeRenderer.setColor(Color.WHITE);
+
+		// Upper line
+		shapeRenderer.rectLine(BOARD_WIDTH + nextPieceXOffset + SQUARE_SIZE * 2.5f, BOARD_HEIGHT - nextPieceYOffset / 2,
+				BOARD_WIDTH + nextPieceXOffset + MyTetrisGame.SQUARE_SIZE * 7.2f, BOARD_HEIGHT - nextPieceYOffset / 2,
+				4);
+		// Downer ? line
+		shapeRenderer.rectLine(BOARD_WIDTH + nextPieceXOffset + SQUARE_SIZE * 2.5f, BOARD_HEIGHT - nextPieceYOffset * 2,
+				BOARD_WIDTH + nextPieceXOffset + MyTetrisGame.SQUARE_SIZE * 7.2f, BOARD_HEIGHT - nextPieceYOffset * 2,
+				4);
+
+		// Correct line
+		shapeRenderer.rectLine(BOARD_WIDTH + nextPieceXOffset + SQUARE_SIZE * 2.5f, BOARD_HEIGHT - nextPieceYOffset * 2,
+				BOARD_WIDTH + nextPieceXOffset + SQUARE_SIZE * 2.5f, BOARD_HEIGHT - nextPieceYOffset / 2, 4);
+
+		// Wroing line
+		shapeRenderer.rectLine(BOARD_WIDTH + nextPieceXOffset + MyTetrisGame.SQUARE_SIZE * 7.2f,
+				BOARD_HEIGHT - nextPieceYOffset * 2, BOARD_WIDTH + nextPieceXOffset + MyTetrisGame.SQUARE_SIZE * 7.2f,
+				BOARD_HEIGHT - nextPieceYOffset / 2, 4);
+		shapeRenderer.end();
+
 	}
 
 	private void drawBoardTetrominos() {
@@ -111,9 +162,9 @@ public class MyTetrisGame extends ApplicationAdapter {
 		shapeRenderer.begin(ShapeType.Filled);
 		shapeRenderer.set(ShapeType.Filled);
 		// Draw every Tetromino block individually
-		for (Tetromino tetromino : this.boardTetrominos) {
+		for (final Tetromino tetromino : this.boardTetrominos) {
 			shapeRenderer.setColor(tetromino.getColor());
-			for (Point position : tetromino.blocks)
+			for (final Point position : tetromino.blocks)
 				drawSquareOnMainBoard(position);
 		}
 		shapeRenderer.end();
@@ -124,32 +175,24 @@ public class MyTetrisGame extends ApplicationAdapter {
 		shapeRenderer.begin(ShapeType.Filled);
 		shapeRenderer.setColor(this.currentTetromino.getColor());
 		shapeRenderer.set(ShapeType.Filled);
-		for (int i = 0; i < 4; i++) {
-			if (i == 0) {
-				shapeRenderer.setColor(Color.WHITE);
-			} else {
-				shapeRenderer.setColor(this.currentTetromino.getColor());
-			}
-			drawSquareOnMainBoard(this.currentTetromino.blocks[i]);
-		}
 
 		// Draw every Tetromino block individually
-		// for (Point position : this.currentTetromino.blocks) {
-		// drawSquareOnMainBoard(position);
-		// }
+		for (Point position : this.currentTetromino.blocks) {
+			drawSquareOnMainBoard(position);
+		}
 
 		shapeRenderer.end();
 	}
 
-	private void drawSquareOnMainBoard(Point position) {
+	private void drawSquareOnMainBoard(final Point position) {
 		shapeRenderer.rect(position.x * SQUARE_SIZE, BOARD_HEIGHT - (rows - position.y) * SQUARE_SIZE, SQUARE_SIZE,
 				SQUARE_SIZE);
 	}
 
 	// Checks if every point is within board bounds and if every point isn't set in
 	// the board
-	public static boolean arePositionsValid(Point[] points) {
-		for (Point square : points) {
+	public static boolean arePositionsValid(final Point[] points) {
+		for (final Point square : points) {
 			if (square.x < 0 || square.x > cols - 1 || square.y < 0 || square.y > rows)
 				return false;
 			if (MyTetrisGame.board[square.x][square.y])

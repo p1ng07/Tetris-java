@@ -7,7 +7,7 @@ import com.mygdx.tetris.MyTetrisGame;
 // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 public class DesktopLauncher {
 	static int WINDOW_HEIGHT = 800;
-	static int WINDOW_WIDTH = 600;
+	static int WINDOW_WIDTH = 800;
 
 	public static void main(String[] arg) {
 		MyTetrisGame myGame = new MyTetrisGame();
