@@ -24,6 +24,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 
 	// New tetromino in the top left corner
 	Tetromino currentTetromino = new Tetromino(cols / 2, rows - 1);
+	Tetromino ghostTetromino = new Tetromino(cols / 2, rows - 1);
 	Tetromino nextPiece = new Tetromino(cols / 2, rows - 1);
 
 	Vector<Tetromino> boardTetrominos = new Vector<Tetromino>();
@@ -58,7 +59,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 				MyTetrisGame.board[i][j] = false;
 	}
 
-	// TODO: ghost piece and hard drop
+	// TODO: Add hard drop
 	@Override
 	public void render() {
 		ScreenUtils.clear(Color.LIGHT_GRAY);
@@ -132,7 +133,39 @@ public class MyTetrisGame extends ApplicationAdapter {
 		}
 	}
 
+	private void checkForLineClears() {
+
+	}
+
+	private void drawGhostPiece() {
+
+		shapeRenderer.begin(ShapeType.Filled);
+		shapeRenderer.setColor(Color.DARK_GRAY);
+		shapeRenderer.set(ShapeType.Filled);
+
+		// Draw every Tetromino block individually
+		for (Point position : this.ghostTetromino.blocks) {
+			drawSquareOnMainBoard(position);
+		}
+
+		shapeRenderer.end();
+	}
+
 	private void updateGhostPiece() {
+		for (int i = 0; i < 4; i++) {
+			this.ghostTetromino.blocks[i].x = this.currentTetromino.blocks[i].x;
+			this.ghostTetromino.blocks[i].y = this.currentTetromino.blocks[i].y;
+		}
+
+		do {
+			for (Point point : this.ghostTetromino.blocks) {
+				point.y--;
+			}
+		} while (MyTetrisGame.arePositionsValid(this.ghostTetromino.blocks));
+
+		for (Point point : this.ghostTetromino.blocks) {
+			point.y++;
+		}
 	}
 
 	private void drawNextPiece() {
