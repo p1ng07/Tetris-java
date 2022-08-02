@@ -202,4 +202,15 @@ public class Tetromino {
     enum PieceType {
         I, O, EVERYTHING_EXCEPT_I_O
     }
+
+    public void hardDrop() {
+        do {
+            for (Point point : this.blocks) {
+                point.y--;
+            }
+        } while (MyTetrisGame.arePositionsValid(blocks));
+        for (Point point : this.blocks) {
+            point.y++;
+        }
+    }
 }

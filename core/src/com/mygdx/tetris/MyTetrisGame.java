@@ -42,6 +42,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 	private final float moveTimerThreshold = 0.3f;
 	private int nextPieceXOffset = 30;
 	private int nextPieceYOffset = 100;
+	private boolean hardDrop = false;
 
 	@Override
 	public void create() {
@@ -64,11 +65,18 @@ public class MyTetrisGame extends ApplicationAdapter {
 
 		drawMainBoard();
 		drawBoardTetrominos();
+		updateGhostPiece();
+		drawGhostPiece();
 		drawNextPiece();
 		if (!isGameOver)
 			drawCurrentTetromino();
 
 		timeElapsedSinceTouchingGround += Gdx.graphics.getDeltaTime();
+
+		if (Gdx.input.isKeyJustPressed(Keys.SPACE)) {
+			this.currentTetromino.hardDrop();
+			this.hardDrop = true;
+		}
 
 		if (Gdx.input.isKeyPressed(Keys.DOWN))
 			currentTetromino.moveDown(board);
@@ -104,8 +112,9 @@ public class MyTetrisGame extends ApplicationAdapter {
 		}
 
 		// Set the piece in the board definitely
-		if (!isGameOver && timeElapsedSinceTouchingGround >= timeToSetAPieceAfterTouching) {
+		if (!isGameOver && timeElapsedSinceTouchingGround >= timeToSetAPieceAfterTouching || this.hardDrop) {
 			timeElapsedSinceTouchingGround = 0f;
+			this.hardDrop = false;
 			if (this.currentTetromino.moveDown(MyTetrisGame.board) == false) {
 				this.boardTetrominos.add(currentTetromino);
 				for (final Point point : this.currentTetromino.blocks) {
@@ -121,6 +130,9 @@ public class MyTetrisGame extends ApplicationAdapter {
 				}
 			}
 		}
+	}
+
+	private void updateGhostPiece() {
 	}
 
 	private void drawNextPiece() {
