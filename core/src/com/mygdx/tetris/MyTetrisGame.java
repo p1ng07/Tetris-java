@@ -23,9 +23,14 @@ public class MyTetrisGame extends ApplicationAdapter {
 	private boolean isGameOver = false;
 
 	// New tetromino in the top left corner
-	Tetromino currentTetromino = new Tetromino(cols / 2, rows - 3);
-	Tetromino ghostTetromino = new Tetromino(cols / 2, rows - 3);
-	Tetromino nextPiece = new Tetromino(cols / 2, rows - 3);
+	Tetromino currentTetromino = newBoardTetromino();
+
+	private Tetromino newBoardTetromino() {
+		return new Tetromino(cols / 2, rows - 3);
+	}
+
+	Tetromino ghostTetromino = newBoardTetromino();
+	Tetromino nextPiece = newBoardTetromino();
 
 	Vector<Tetromino> boardTetrominos = new Vector<Tetromino>();
 
@@ -63,9 +68,12 @@ public class MyTetrisGame extends ApplicationAdapter {
 			for (int j = 0; j < rows; j++) {
 				MyTetrisGame.board[i][j] = false;
 			}
+		this.currentTetromino = newBoardTetromino();
+		this.nextPiece = newBoardTetromino();
 	}
 
-	// TODO: Add hability to clear lines
+	// TODO: Fix bug where game isnt ending, increase speed at which pieces fall
+	// incrementally, pretty game, sound effect when line clear
 	@Override
 	public void render() {
 		ScreenUtils.clear(Color.LIGHT_GRAY);
@@ -77,6 +85,9 @@ public class MyTetrisGame extends ApplicationAdapter {
 			updateGhostPiece();
 			drawGhostPiece();
 			drawCurrentTetromino();
+		} else {
+			restartBoard();
+			isGameOver = false;
 		}
 
 		timeElapsedSinceTouchingGround += Gdx.graphics.getDeltaTime();
@@ -86,33 +97,41 @@ public class MyTetrisGame extends ApplicationAdapter {
 			this.hardDrop = true;
 		}
 
-		if (Gdx.input.isKeyPressed(Keys.DOWN))
+		if (Gdx.input.isKeyPressed(Keys.S) || Gdx.input.isKeyPressed(Keys.O))
 			currentTetromino.moveDown(board);
 
-		if (!isGameOver && Gdx.input.isKeyJustPressed(Keys.UP)) {
+		// Rotate clock wise
+		if (!isGameOver && (Gdx.input.isKeyJustPressed(Keys.UP) || Gdx.input.isKeyJustPressed(Keys.W)
+				|| Gdx.input.isKeyJustPressed(Keys.COLON) || Gdx.input.isKeyJustPressed(Keys.T)
+				|| Gdx.input.isKeyJustPressed(Keys.K))) {
 			currentTetromino.rotate(true, true);
-			System.out.println("The new rotation index is " + this.currentTetromino.rotationIndex);
 		}
 
-		if (Gdx.input.isKeyJustPressed(Keys.LEFT)) {
+		// Rotate counter clockwise
+		if (!isGameOver && (Gdx.input.isKeyJustPressed(Keys.H) || Gdx.input.isKeyJustPressed(Keys.J))) {
+			currentTetromino.rotate(false, true);
+		}
+
+		if (Gdx.input.isKeyJustPressed(Keys.LEFT) || Gdx.input.isKeyJustPressed(Keys.A)) {
 			currentTetromino.moveLeft(board);
 			timeElapsedSinceTouchingGround = 0.0f;
 			timerLeft = 0.0f;
 		}
 
-		if (Gdx.input.isKeyPressed(Keys.LEFT)) {
+		if (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A)) {
 			timerLeft += Gdx.graphics.getDeltaTime();
 			timeElapsedSinceTouchingGround = 0.0f;
 			if (timerLeft > moveTimerThreshold)
 				currentTetromino.moveLeft(board);
 		}
 
-		if (Gdx.input.isKeyJustPressed(Keys.RIGHT)) {
+		if (Gdx.input.isKeyJustPressed(Keys.RIGHT) || Gdx.input.isKeyJustPressed(Keys.E)
+				|| Gdx.input.isKeyJustPressed(Keys.D)) {
 			currentTetromino.moveRight(board);
 			timeElapsedSinceTouchingGround = 0.0f;
 			timerRight = 0.0f;
 		}
-		if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
+		if (Gdx.input.isKeyPressed(Keys.RIGHT) || Gdx.input.isKeyPressed(Keys.E) || Gdx.input.isKeyPressed(Keys.D)) {
 			timerRight += Gdx.graphics.getDeltaTime();
 			timeElapsedSinceTouchingGround = 0.0f;
 			if (timerRight > moveTimerThreshold)
@@ -127,12 +146,12 @@ public class MyTetrisGame extends ApplicationAdapter {
 				setPieceIntoBoard(currentTetromino);
 				// this.boardTetrominos.add(currentTetromino);
 
-				final Tetromino newTetromino = new Tetromino(cols / 2, rows - 1);
+				final Tetromino newTetromino = newBoardTetromino();
 				if (!arePositionsValid(newTetromino.blocks)) {
 					isGameOver = true;
 				} else {
 					this.currentTetromino = this.nextPiece;
-					nextPiece = new Tetromino(cols / 2, rows - 3);
+					nextPiece = newBoardTetromino();
 				}
 			}
 			if (checkForLinesToClear()) {
