@@ -7,8 +7,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -43,6 +41,8 @@ public class MyTetrisGame extends ApplicationAdapter {
 
 	private float timeElapsedSinceTouchingGround;
 	private final float timeToSetAPieceAfterTouching = 0.5f;
+	private Float timeSinceMovingDown = 0f;
+	private Float timeLimitToMoveDown = 1.0f;
 
 	private float timerLeft;
 	private float timerRight;
@@ -72,7 +72,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 		this.nextPiece = newBoardTetromino();
 	}
 
-	// TODO: Fix bug where game isnt ending, increase speed at which pieces fall
+	// TODO: increase speed at which pieces fall
 	// incrementally, pretty game, sound effect when line clear
 	@Override
 	public void render() {
@@ -90,7 +90,9 @@ public class MyTetrisGame extends ApplicationAdapter {
 			isGameOver = false;
 		}
 
+		// Increment Timers
 		timeElapsedSinceTouchingGround += Gdx.graphics.getDeltaTime();
+		timeSinceMovingDown += Gdx.graphics.getDeltaTime();
 
 		if (Gdx.input.isKeyJustPressed(Keys.SPACE)) {
 			this.currentTetromino.hardDrop();
@@ -138,11 +140,16 @@ public class MyTetrisGame extends ApplicationAdapter {
 				currentTetromino.moveRight(board);
 		}
 
+		if (timeSinceMovingDown >= timeLimitToMoveDown) {
+			this.currentTetromino.moveDown(MyTetrisGame.board);
+			timeSinceMovingDown = 0.0f;
+		}
+
 		// Set the piece in the board definitely
 		if (!isGameOver && timeElapsedSinceTouchingGround >= timeToSetAPieceAfterTouching || this.hardDrop) {
 			timeElapsedSinceTouchingGround = 0f;
 			this.hardDrop = false;
-			if (this.currentTetromino.moveDown(MyTetrisGame.board) == false) {
+			if (!this.currentTetromino.canMoveDown()) {
 				setPieceIntoBoard(currentTetromino);
 				// this.boardTetrominos.add(currentTetromino);
 
@@ -156,6 +163,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 			}
 			if (checkForLinesToClear()) {
 				clearLines();
+				timeLimitToMoveDown -= 0.03f;
 			}
 		}
 	}
@@ -208,8 +216,8 @@ public class MyTetrisGame extends ApplicationAdapter {
 		return false;
 	}
 
-	private void setPieceIntoBoard(Tetromino tetromino) {
-		for (Point point : tetromino.blocks) {
+	private void setPieceIntoBoard(final Tetromino tetromino) {
+		for (final Point point : tetromino.blocks) {
 			MyTetrisGame.board[point.x][point.y] = true;
 			boardColors[point.x][point.y] = tetromino.getColor();
 		}

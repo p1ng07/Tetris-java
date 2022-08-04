@@ -21,7 +21,8 @@ public class Tetromino {
             blocks[1] = new Point(0, -1);
             blocks[2] = new Point(0, 0);
             blocks[3] = new Point(-2, -1);
-            this.color = Color.ORANGE;
+            this.color = new Color();
+            this.color.set(1, 0.589f, 0.109375f, 256f);
             break;
         case 2:
             // Draw a J shape
@@ -88,26 +89,12 @@ public class Tetromino {
     }
 
     // Returns false if tetromino cant move down
-    public boolean moveDown(final boolean[][] board) {
-        boolean canMoveDown = true;
-        // Check if we are at the bottom of the board
-        for (final Point square : this.blocks)
-            if (square.y - 1 < 0)
-                return false;
-
-        // Check if the squares bellow the current tetromino are occupied
-        // If they are filled, then we cant move down
-        for (final Point square : this.blocks)
-            if (board[square.x][square.y - 1])
-                canMoveDown = false;
-
-        if (!canMoveDown) {
-            return false;
-        }
+    public void moveDown(final boolean[][] board) {
+        if (!canMoveDown())
+            return;
         for (final Point square : this.blocks) {
             square.y--;
         }
-        return true;
     }
 
     public void moveRight(final boolean[][] board) {
@@ -212,5 +199,20 @@ public class Tetromino {
         for (Point point : this.blocks) {
             point.y++;
         }
+    }
+
+    public boolean canMoveDown() {
+        // Check if we are at the bottom of the board
+        for (final Point square : this.blocks)
+            if (square.y - 1 < 0)
+                return false;
+
+        // Check if the squares bellow the current tetromino are occupied
+        // If they are filled, then we cant move down
+        for (final Point square : this.blocks)
+            if (MyTetrisGame.board[square.x][square.y - 1])
+                return false;
+
+        return true;
     }
 }
