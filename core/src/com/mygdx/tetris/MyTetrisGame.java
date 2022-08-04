@@ -59,7 +59,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 
 		this.shapeRenderer = new ShapeRenderer();
 
-		// Reset the game board
+		// Re-initialize the game board
 		restartBoard();
 	}
 
@@ -100,7 +100,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 		}
 
 		if (Gdx.input.isKeyPressed(Keys.S) || Gdx.input.isKeyPressed(Keys.O))
-			currentTetromino.moveDown(board);
+			currentTetromino.moveDown();
 
 		// Rotate clock wise
 		if (!isGameOver && (Gdx.input.isKeyJustPressed(Keys.UP) || Gdx.input.isKeyJustPressed(Keys.W)
@@ -115,7 +115,7 @@ public class MyTetrisGame extends ApplicationAdapter {
 		}
 
 		if (Gdx.input.isKeyJustPressed(Keys.LEFT) || Gdx.input.isKeyJustPressed(Keys.A)) {
-			currentTetromino.moveLeft(board);
+			currentTetromino.moveLeft();
 			timeElapsedSinceTouchingGround = 0.0f;
 			timerLeft = 0.0f;
 		}
@@ -124,12 +124,12 @@ public class MyTetrisGame extends ApplicationAdapter {
 			timerLeft += Gdx.graphics.getDeltaTime();
 			timeElapsedSinceTouchingGround = 0.0f;
 			if (timerLeft > moveTimerThreshold)
-				currentTetromino.moveLeft(board);
+				currentTetromino.moveLeft();
 		}
 
 		if (Gdx.input.isKeyJustPressed(Keys.RIGHT) || Gdx.input.isKeyJustPressed(Keys.E)
 				|| Gdx.input.isKeyJustPressed(Keys.D)) {
-			currentTetromino.moveRight(board);
+			currentTetromino.moveRight();
 			timeElapsedSinceTouchingGround = 0.0f;
 			timerRight = 0.0f;
 		}
@@ -137,11 +137,11 @@ public class MyTetrisGame extends ApplicationAdapter {
 			timerRight += Gdx.graphics.getDeltaTime();
 			timeElapsedSinceTouchingGround = 0.0f;
 			if (timerRight > moveTimerThreshold)
-				currentTetromino.moveRight(board);
+				currentTetromino.moveRight();
 		}
 
 		if (timeSinceMovingDown >= timeLimitToMoveDown) {
-			this.currentTetromino.moveDown(MyTetrisGame.board);
+			this.currentTetromino.moveDown();
 			timeSinceMovingDown = 0.0f;
 		}
 

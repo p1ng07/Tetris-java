@@ -1,14 +1,14 @@
 package com.mygdx.tetris;
 
 import java.util.concurrent.ThreadLocalRandom;
-
 import com.badlogic.gdx.graphics.Color;
 
 public class Tetromino {
     private Color color = Color.ORANGE;
-    Point blocks[] = new Point[4];
-    Integer rotationIndex = 0;
-    PieceType type = PieceType.EVERYTHING_EXCEPT_I_O;
+
+    public Point blocks[] = new Point[4];
+    private Integer rotationIndex = 0;
+    private PieceType type = PieceType.EVERYTHING_EXCEPT_I_O;
 
     // Generates a random Tetris Piece
     // The col and line given are the reference square for the piece
@@ -88,20 +88,28 @@ public class Tetromino {
         return this.color;
     }
 
-    // Returns false if tetromino cant move down
-    public void moveDown(final boolean[][] board) {
-        if (!canMoveDown())
-            return;
-        for (final Point square : this.blocks) {
-            square.y--;
-        }
+    public boolean canMoveDown() {
+
+        for (final Point square : this.blocks)
+            if (square.y - 1 >= 0) {
+                if (MyTetrisGame.board[square.x][square.y - 1])
+                    return false;
+            } else
+                return false;
+        return true;
     }
 
-    public void moveRight(final boolean[][] board) {
-        // Check if we are at the left most square of the board or if the left square of
-        // the board is filled
+    // Returns false if tetromino cant move down
+    public void moveDown() {
+        if (!canMoveDown())
+            return;
         for (final Point square : this.blocks)
-            if (square.x + 1 > MyTetrisGame.cols - 1 || board[square.x + 1][square.y])
+            square.y--;
+    }
+
+    public void moveRight() {
+        for (final Point square : this.blocks)
+            if (square.x + 1 > MyTetrisGame.cols - 1 || MyTetrisGame.board[square.x + 1][square.y])
                 return;
 
         for (final Point square : this.blocks) {
@@ -109,15 +117,32 @@ public class Tetromino {
         }
     }
 
-    public void moveLeft(final boolean[][] board) {
-        // Check if we are at the left most square of the board or if the left square of
-        // the board is filled
+    public void moveLeft() {
         for (final Point square : this.blocks)
-            if (square.x - 1 < 0 || board[square.x - 1][square.y])
+            if (square.x - 1 < 0 || MyTetrisGame.board[square.x - 1][square.y])
                 return;
 
         for (final Point square : this.blocks)
             square.x--;
+    }
+
+    static Point[][] O_OFFSET = { { new Point(0, 0) }, { new Point(0, -1) }, { new Point(-1, -1) },
+            { new Point(-1, 0) } };
+
+    static Point[][] I_OFFSET = {
+            { new Point(0, 0), new Point(-1, 0), new Point(2, 0), new Point(-1, 0), new Point(2, 0) },
+            { new Point(-1, 0), new Point(0, 0), new Point(0, 0), new Point(0, 1), new Point(0, -2) },
+            { new Point(-1, 1), new Point(1, 1), new Point(-2, 1), new Point(1, 0), new Point(-2, 0) },
+            { new Point(0, 1), new Point(0, 1), new Point(0, 1), new Point(0, -1), new Point(0, 2) } };
+
+    static Point[][] DEFAULT_OFFSET = {
+            { new Point(0, 0), new Point(0, 0), new Point(+0, -0), new Point(0, +0), new Point(+0, +0) },
+            { new Point(0, 0), new Point(1, 0), new Point(+1, -1), new Point(0, +2), new Point(+1, +2) },
+            { new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0) },
+            { new Point(0, 0), new Point(-1, 0), new Point(-1, -1), new Point(0, +2), new Point(-1, +2) } };
+
+    enum PieceType {
+        I, O, EVERYTHING_EXCEPT_I_O
     }
 
     public void rotate(final boolean clockwise, final Boolean offset) {
@@ -137,7 +162,7 @@ public class Tetromino {
         final int oldRotationIndex = this.rotationIndex;
 
         rotationIndex = clockwise ? rotationIndex + 1 : rotationIndex - 1;
-        rotationIndex = mod(rotationIndex, 4);
+        rotationIndex = betterMod(rotationIndex, 4);
 
         Point[][] offsetToUse = DEFAULT_OFFSET;
         if (type == PieceType.I) {
@@ -167,27 +192,8 @@ public class Tetromino {
 
     }
 
-    static Point[][] O_OFFSET = { { new Point(0, 0) }, { new Point(0, -1) }, { new Point(-1, -1) },
-            { new Point(-1, 0) } };
-
-    static Point[][] I_OFFSET = {
-            { new Point(0, 0), new Point(-1, 0), new Point(2, 0), new Point(-1, 0), new Point(2, 0) },
-            { new Point(-1, 0), new Point(0, 0), new Point(0, 0), new Point(0, 1), new Point(0, -2) },
-            { new Point(-1, 1), new Point(1, 1), new Point(-2, 1), new Point(1, 0), new Point(-2, 0) },
-            { new Point(0, 1), new Point(0, 1), new Point(0, 1), new Point(0, -1), new Point(0, 2) } };
-
-    static Point[][] DEFAULT_OFFSET = {
-            { new Point(0, 0), new Point(0, 0), new Point(+0, -0), new Point(0, +0), new Point(+0, +0) },
-            { new Point(0, 0), new Point(1, 0), new Point(+1, -1), new Point(0, +2), new Point(+1, +2) },
-            { new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0) },
-            { new Point(0, 0), new Point(-1, 0), new Point(-1, -1), new Point(0, +2), new Point(-1, +2) } };
-
-    public Integer mod(final int x, final int m) {
+    public Integer betterMod(final int x, final int m) {
         return (x % m + m) % m;
-    }
-
-    enum PieceType {
-        I, O, EVERYTHING_EXCEPT_I_O
     }
 
     public void hardDrop() {
@@ -201,18 +207,4 @@ public class Tetromino {
         }
     }
 
-    public boolean canMoveDown() {
-        // Check if we are at the bottom of the board
-        for (final Point square : this.blocks)
-            if (square.y - 1 < 0)
-                return false;
-
-        // Check if the squares bellow the current tetromino are occupied
-        // If they are filled, then we cant move down
-        for (final Point square : this.blocks)
-            if (MyTetrisGame.board[square.x][square.y - 1])
-                return false;
-
-        return true;
-    }
 }
