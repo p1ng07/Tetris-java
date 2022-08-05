@@ -72,8 +72,6 @@ public class MyTetrisGame extends ApplicationAdapter {
 		this.nextPiece = newBoardTetromino();
 	}
 
-	// TODO: increase speed at which pieces fall
-	// incrementally, pretty game, sound effect when line clear
 	@Override
 	public void render() {
 		ScreenUtils.clear(Color.LIGHT_GRAY);
