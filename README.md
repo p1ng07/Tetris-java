@@ -4,7 +4,7 @@ Run game:
 > git clone https://github.com/p1ng07/Tetris-java
 
 > on windows:
-> ./gradlew.bat run
+> *./gradlew.bat run*
 
 > on linux
-> ./gradlew run
+> *./gradlew run*
